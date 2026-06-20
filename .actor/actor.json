@@ -1,0 +1,11 @@
+{
+  "actorSpecification": 1,
+  "name": "dex-funding-aggregator",
+  "title": "DEX Funding Rate Aggregator",
+  "description": "Aggregate perpetual funding rates across Hyperliquid, Aster, Lighter, and Pacifica with Binance/Bybit as CEX reference. Spot DEX-vs-CEX funding spreads and cross-venue carry-trade signals. No API key required.",
+  "version": "0.1",
+  "categories": ["FINANCE"],
+  "input": "./input_schema.json",
+  "dockerfile": "./Dockerfile",
+  "readme": "../README.md"
+}

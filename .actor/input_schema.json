@@ -1,0 +1,103 @@
+{
+  "title": "DEX Funding Rate Aggregator Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "symbols": {
+      "title": "Symbols",
+      "type": "array",
+      "description": "Base symbols to track. Defaults to BTC, ETH, SOL.",
+      "default": ["BTC", "ETH", "SOL"],
+      "prefill": ["BTC", "ETH", "SOL"],
+      "editor": "stringList"
+    },
+    "includeHyperliquid": {
+      "title": "Include Hyperliquid",
+      "type": "boolean",
+      "description": "Include Hyperliquid DEX (Ethereum L1, 1h funding).",
+      "default": true,
+      "editor": "checkbox"
+    },
+    "includeAster": {
+      "title": "Include Aster",
+      "type": "boolean",
+      "description": "Include Aster DEX (Ethereum ecosystem, 8h funding).",
+      "default": true,
+      "editor": "checkbox"
+    },
+    "includeLighter": {
+      "title": "Include Lighter",
+      "type": "boolean",
+      "description": "Include Lighter DEX (Ethereum ZK L2).",
+      "default": true,
+      "editor": "checkbox"
+    },
+    "includePacifica": {
+      "title": "Include Pacifica",
+      "type": "boolean",
+      "description": "Include Pacifica DEX (Solana, 1h funding).",
+      "default": true,
+      "editor": "checkbox"
+    },
+    "includeBinance": {
+      "title": "Include Binance (CEX reference)",
+      "type": "boolean",
+      "description": "Include Binance USDT-M futures as CEX reference.",
+      "default": true,
+      "editor": "checkbox"
+    },
+    "includeBybit": {
+      "title": "Include Bybit (CEX reference)",
+      "type": "boolean",
+      "description": "Include Bybit linear perps as CEX reference.",
+      "default": true,
+      "editor": "checkbox"
+    },
+    "minAbsFundingApr": {
+      "title": "Min Absolute Funding APR (%)",
+      "type": "number",
+      "description": "Only return symbols where max |funding APR| exceeds this value.",
+      "default": 0,
+      "minimum": 0,
+      "editor": "number"
+    },
+    "minVenueSpreadApr": {
+      "title": "Min Venue Spread APR (%)",
+      "type": "number",
+      "description": "Only return symbols where cross-venue spread exceeds this value.",
+      "default": 0,
+      "minimum": 0,
+      "editor": "number"
+    },
+    "sortBy": {
+      "title": "Sort By",
+      "type": "string",
+      "description": "How to sort output records.",
+      "default": "spread_desc",
+      "enum": ["spread_desc", "abs_funding_desc", "symbol_asc"],
+      "enumTitles": ["Venue spread (desc)", "Abs funding APR (desc)", "Symbol (A-Z)"],
+      "editor": "select"
+    },
+    "alertAbsApr": {
+      "title": "Telegram Alert Threshold APR (%)",
+      "type": "number",
+      "description": "Send Telegram alert when any symbol's |funding APR| exceeds this. Set 0 to disable.",
+      "default": 0,
+      "minimum": 0,
+      "editor": "number"
+    },
+    "telegramBotToken": {
+      "title": "Telegram Bot Token",
+      "type": "string",
+      "description": "Telegram bot token for alerts.",
+      "editor": "textfield",
+      "isSecret": true
+    },
+    "telegramChatId": {
+      "title": "Telegram Chat ID",
+      "type": "string",
+      "description": "Telegram chat ID to receive alerts.",
+      "editor": "textfield"
+    }
+  }
+}
