@@ -32,7 +32,7 @@ Real example from a live run:
 | Platform | Type | Chain | Funding Interval |
 |----------|------|-------|-----------------|
 | Hyperliquid | DEX | Own L1 | 1h |
-| Aster | DEX | Ethereum ecosystem | 8h |
+| Aster | DEX | Multi-chain (BNB Chain + Aster Chain L1) | 8h |
 | Lighter | DEX | Ethereum ZK L2 | 8h |
 | Pacifica | DEX | Solana | 1h |
 | Binance | CEX reference | — | 8h |

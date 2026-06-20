@@ -21,7 +21,7 @@
     "includeAster": {
       "title": "Include Aster",
       "type": "boolean",
-      "description": "Include Aster DEX (Ethereum ecosystem, 8h funding).",
+      "description": "Include Aster DEX (Multi-chain: BNB Chain + Aster Chain L1, 8h funding).",
       "default": true,
       "editor": "checkbox"
     },
