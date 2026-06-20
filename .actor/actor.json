@@ -7,5 +7,19 @@
   "categories": ["FINANCE"],
   "input": "./input_schema.json",
   "dockerfile": "./Dockerfile",
-  "readme": "../README.md"
+  "readme": "../README.md",
+  "pricingInfos": [
+    {
+      "pricingModel": "PAY_PER_EVENT",
+      "pricingPerEvent": {
+        "actorTaskEvents": [
+          {
+            "eventTitle": "Result",
+            "eventName": "result",
+            "eventPriceMicrodollars": 2000
+          }
+        ]
+      }
+    }
+  ]
 }
