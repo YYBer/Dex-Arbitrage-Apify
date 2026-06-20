@@ -1,33 +1,47 @@
 # DEX Funding Rate Aggregator
 
-Aggregate perpetual swap funding rates across **4 DEX platforms** (Hyperliquid, Aster, Lighter, Pacifica) with **Binance and Bybit as CEX reference** — in a single call. Spot DEX-vs-CEX funding spreads, cross-venue carry-trade signals, and extreme funding outliers. No API key required.
+> **The first Actor on Apify Store dedicated to DEX perpetual funding rates.**  
+> Aggregate live funding rates across Hyperliquid, Aster, Lighter, and Pacifica — with Binance and Bybit as CEX benchmarks — in a single call. No API key required.
 
-## What It Does
+---
 
-Pulls live funding rates for perpetual swaps from 4 decentralized exchanges and 2 major CEX references, normalizes them to annualized percentages (APR), and surfaces cross-venue arbitrage opportunities. Use it to:
+## The Problem
 
-- **Find DEX-CEX funding spreads** — DEX perps often carry higher funding than CEX due to thinner liquidity, creating carry-trade opportunities
-- **Detect cross-DEX spreads** — long the cheapest-funded DEX, short the most expensive one, collect the spread
-- **Spot extreme funding** — symbols with high |APR| signal over-leveraged positioning
-- **Get Telegram alerts** when any symbol's |funding APR| crosses your threshold
+DEX perpetual funding rates are scattered across 4+ different chains and APIs with no unified view. A trader trying to find carry-trade opportunities must manually check Hyperliquid (Ethereum L1), Aster (BNB Chain), Lighter (Ethereum ZK L2), and Pacifica (Solana) — all with different data formats and funding intervals.
 
-## Why DEX Funding Rates Matter
+Meanwhile, DEX funding rates routinely diverge from CEX (Binance/Bybit) by **10–20% APR** — a real, recurring arbitrage opportunity that goes undetected without cross-venue aggregation.
 
-DEX perpetuals (Hyperliquid, Aster, Lighter, Pacifica) often deviate significantly from CEX funding rates due to:
+## The Solution
 
-- **Thinner liquidity** → larger funding swings
-- **Isolated user bases** → different long/short skew per chain
-- **Different settlement intervals** — 1h (Hyperliquid, Pacifica) vs 8h (Aster, Lighter, Binance, Bybit)
+This Actor fetches, normalizes, and compares funding rates across **6 venues in one call**, surfacing:
 
-Real example from a live run:
+- 🏆 **Best carry-trade pair**: which venue to long, which to short
+- 📊 **Cross-venue spread**: total APR captured by holding both sides
+- 📡 **DEX-vs-CEX spread**: how much DEX funding deviates from CEX baseline
+
+**Live example output** (real data, June 20 2026):
 
 | Symbol | Best Long | Best Short | Spread APR |
 |--------|-----------|------------|------------|
-| SOL | Binance (−7.1%) | Hyperliquid (+11.0%) | **18.0%** |
-| ETH | Pacifica (−6.4%) | Hyperliquid (+11.0%) | **17.4%** |
-| BTC | Pacifica (−3.8%) | Aster (+6.2%) | **10.0%** |
+| ETH | Pacifica (−9.6%) | Hyperliquid (+11.0%) | **20.5%** |
+| SOL | Binance (−7.2%) | Hyperliquid (+11.0%) | **18.1%** |
+| BTC | Pacifica (−7.3%) | Hyperliquid (+8.3%) | **15.6%** |
 
-## Platforms
+A 20% APR spread on ETH means: long ETH on Pacifica (receive 9.6% APR from shorts), short ETH on Hyperliquid (receive 11.0% APR from longs) = **20.6% annualized yield**, delta-neutral.
+
+---
+
+## What It Does
+
+1. **Fetches** live funding rates from 6 venues in parallel
+2. **Normalizes** all rates to APR% (accounts for different settlement intervals: 1h vs 8h)
+3. **Computes** cross-venue spread, DEX-vs-CEX spread, best long/short venue per symbol
+4. **Filters & sorts** by spread size or absolute funding magnitude
+5. **Alerts** via Telegram when funding exceeds your threshold
+
+---
+
+## Platforms Covered
 
 | Platform | Type | Chain | Funding Interval |
 |----------|------|-------|-----------------|
@@ -38,26 +52,29 @@ Real example from a live run:
 | Binance | CEX reference | — | 8h |
 | Bybit | CEX reference | — | 8h |
 
+*All endpoints are public. No API keys required.*
+
+---
+
 ## Input
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `symbols` | string[] | `["BTC","ETH","SOL"]` | Base symbols to track |
-| `includeHyperliquid` | boolean | true | Include Hyperliquid |
-| `includeAster` | boolean | true | Include Aster |
-| `includeLighter` | boolean | true | Include Lighter |
-| `includePacifica` | boolean | true | Include Pacifica |
-| `includeBinance` | boolean | true | Include Binance (CEX ref) |
-| `includeBybit` | boolean | true | Include Bybit (CEX ref) |
-| `minAbsFundingApr` | number | 0 | Filter: only return symbols where \|APR\| exceeds this |
-| `minVenueSpreadApr` | number | 0 | Filter: only return symbols where spread exceeds this |
+| `symbols` | string[] | `["BTC","ETH","SOL"]` | Symbols to track |
+| `includeHyperliquid` | boolean | true | |
+| `includeAster` | boolean | true | |
+| `includeLighter` | boolean | true | |
+| `includePacifica` | boolean | true | |
+| `includeBinance` | boolean | true | CEX reference |
+| `includeBybit` | boolean | true | CEX reference |
+| `minAbsFundingApr` | number | 0 | Filter: skip if max \|APR\| below this |
+| `minVenueSpreadApr` | number | 0 | Filter: skip if spread below this |
 | `sortBy` | string | `spread_desc` | `spread_desc` / `abs_funding_desc` / `symbol_asc` |
 | `alertAbsApr` | number | 0 | Telegram alert threshold (0 = disabled) |
-| `telegramBotToken` | string (secret) | — | Telegram bot token |
-| `telegramChatId` | string | — | Telegram chat ID |
+| `telegramBotToken` | string (secret) | — | |
+| `telegramChatId` | string | — | |
 
-### Example: Hunt for cross-venue spread opportunities
-
+### Example: Find all symbols with spread > 5% APR
 ```json
 {
   "symbols": ["BTC", "ETH", "SOL"],
@@ -66,16 +83,17 @@ Real example from a live run:
 }
 ```
 
-### Example: Daily Telegram alert when any DEX funding exceeds 20% APR
-
+### Example: Telegram alert when funding goes extreme
 ```json
 {
   "symbols": ["BTC", "ETH", "SOL"],
-  "alertAbsApr": 20,
-  "telegramBotToken": "<bot_token>",
+  "alertAbsApr": 30,
+  "telegramBotToken": "<token>",
   "telegramChatId": "<chat_id>"
 }
 ```
+
+---
 
 ## Output
 
@@ -83,47 +101,55 @@ Each record represents one symbol across all enabled venues:
 
 ```json
 {
-  "symbol": "SOL",
+  "symbol": "ETH",
   "hyperliquid_funding_apr_pct": 10.95,
   "aster_funding_apr_pct": 0.0,
-  "lighter_funding_apr_pct": 0.0,
-  "pacifica_funding_apr_pct": -2.628,
-  "binance_funding_apr_pct": -7.079,
-  "bybit_funding_apr_pct": 6.718,
+  "lighter_funding_apr_pct": -0.876,
+  "pacifica_funding_apr_pct": -9.583,
+  "binance_funding_apr_pct": 4.071,
+  "bybit_funding_apr_pct": 9.161,
   "max_abs_funding_apr_pct": 10.95,
-  "venue_spread_apr_pct": 18.03,
-  "dex_cex_spread_apr_pct": 18.03,
-  "best_long_venue": "binance",
+  "venue_spread_apr_pct": 20.533,
+  "dex_cex_spread_apr_pct": 6.879,
+  "best_long_venue": "pacifica",
   "best_short_venue": "hyperliquid",
   "exchanges_present": 6,
   "next_funding_time": "2026-06-20T16:00:00.000Z",
-  "timestamp": "2026-06-20T10:53:26.531Z"
+  "timestamp": "2026-06-20T11:36:24.650Z"
 }
 ```
 
 | Field | Description |
 |-------|-------------|
-| `*_funding_apr_pct` | Funding rate annualized to APR% (rate × periods_per_year × 100) |
-| `max_abs_funding_apr_pct` | Largest \|APR\| across all present venues |
-| `venue_spread_apr_pct` | Max APR venue minus min APR venue — total carry-trade spread |
-| `dex_cex_spread_apr_pct` | Max DEX APR minus min CEX APR — DEX premium signal |
-| `best_long_venue` | Venue with the lowest rate (cheapest to hold long / best to receive funding short) |
-| `best_short_venue` | Venue with the highest rate (best to hold short and receive funding) |
-| `exchanges_present` | Number of venues that returned data for this symbol (1–6) |
+| `*_funding_apr_pct` | Funding rate annualized to APR% |
+| `venue_spread_apr_pct` | Max APR minus min APR — the carry-trade spread |
+| `dex_cex_spread_apr_pct` | Max DEX APR minus min CEX APR — DEX premium |
+| `best_long_venue` | Cheapest venue to hold long (or receive most as short) |
+| `best_short_venue` | Best venue to hold short and collect funding |
+| `exchanges_present` | Number of venues with data for this symbol (1–6) |
 
-## Pricing
-
-Pay-Per-Event (PPE): **$0.002 per symbol returned**
-
-- Default 3 symbols (BTC, ETH, SOL): **$0.006 per run**
+---
 
 ## Data Sources
 
-All endpoints are public — no API keys required:
+| Venue | Endpoint |
+|-------|----------|
+| Hyperliquid | `POST https://api.hyperliquid.xyz/info` (`metaAndAssetCtxs`) |
+| Aster | `GET https://fapi.asterdex.com/fapi/v1/premiumIndex` |
+| Lighter | `GET https://mainnet.zklighter.elliot.ai/api/v1/funding-rates` |
+| Pacifica | `GET https://api.pacifica.fi/api/v1/funding_rate/history` |
+| Binance | via Lighter aggregated endpoint (avoids geo-restrictions) |
+| Bybit | via Lighter aggregated endpoint (avoids geo-restrictions) |
 
-- **Hyperliquid**: `POST https://api.hyperliquid.xyz/info` (`metaAndAssetCtxs`)
-- **Aster**: `GET https://fapi.asterdex.com/fapi/v1/premiumIndex`
-- **Lighter**: `GET https://mainnet.zklighter.elliot.ai/api/v1/funding-rates`
-- **Pacifica**: `GET https://api.pacifica.fi/api/v1/funding_rate/history`
-- **Binance**: `GET https://fapi.binance.com/fapi/v1/premiumIndex`
-- **Bybit**: `GET https://api.bybit.com/v5/market/tickers?category=linear`
+---
+
+## Why This Matters
+
+**Carry trading** is one of the most consistent yield strategies in crypto — but it requires knowing where the rate imbalance is. CEX funding rates are well-covered. DEX rates are not.
+
+This Actor fills that gap: one call, 6 venues, actionable spread signal.
+
+Use cases:
+- **Quant traders** — scan for entry signals, run on schedule via Apify
+- **DeFi protocols** — monitor funding conditions across chains
+- **Risk desks** — track DEX-vs-CEX divergence as a market stress indicator

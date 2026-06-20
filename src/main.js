@@ -123,8 +123,5 @@ Actor.main(async () => {
         }
     }
 
-    // PPE charging — $0.002 per record
-    await Actor.charge({ eventName: 'result', count: sorted.length });
-
     console.log(`Done. ${sorted.length} records pushed.`);
 });
