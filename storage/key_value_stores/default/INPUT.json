@@ -1,0 +1,12 @@
+{
+  "symbols": ["BTC", "ETH", "SOL"],
+  "includeHyperliquid": true,
+  "includeAster": true,
+  "includeLighter": true,
+  "includePacifica": true,
+  "includeBinance": true,
+  "includeBybit": true,
+  "minAbsFundingApr": 0,
+  "minVenueSpreadApr": 0,
+  "sortBy": "spread_desc"
+}

@@ -1,0 +1,22 @@
+{
+	"symbol": "BTC",
+	"timestamp": "2026-06-20T11:36:24.650Z",
+	"hyperliquid_funding_apr_pct": 8.3345,
+	"hyperliquid_mark_price": 63672,
+	"aster_funding_apr_pct": 5.8309,
+	"aster_mark_price": 63675.2,
+	"next_funding_time": "2026-06-20T16:00:00.000Z",
+	"lighter_funding_apr_pct": 1.752,
+	"pacifica_funding_apr_pct": -7.2708,
+	"pacifica_mark_price": 63676.147348,
+	"binance_funding_apr_pct": 3.4547,
+	"binance_mark_price": 63676.67713043,
+	"bybit_funding_apr_pct": 3.0156,
+	"bybit_mark_price": 63678.8,
+	"max_abs_funding_apr_pct": 8.3345,
+	"venue_spread_apr_pct": 15.6053,
+	"best_long_venue": "pacifica",
+	"best_short_venue": "hyperliquid",
+	"exchanges_present": 6,
+	"dex_cex_spread_apr_pct": 5.3189
+}

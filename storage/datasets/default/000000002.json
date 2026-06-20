@@ -1,0 +1,22 @@
+{
+	"symbol": "SOL",
+	"timestamp": "2026-06-20T11:36:24.650Z",
+	"hyperliquid_funding_apr_pct": 10.95,
+	"hyperliquid_mark_price": 71.644,
+	"aster_funding_apr_pct": 0,
+	"aster_mark_price": 71.59923233,
+	"next_funding_time": "2026-06-20T16:00:00.000Z",
+	"lighter_funding_apr_pct": -1.752,
+	"pacifica_funding_apr_pct": -6.097,
+	"pacifica_mark_price": 71.688633,
+	"binance_funding_apr_pct": -7.1876,
+	"binance_mark_price": 71.63,
+	"bybit_funding_apr_pct": 4.3647,
+	"bybit_mark_price": 71.62,
+	"max_abs_funding_apr_pct": 10.95,
+	"venue_spread_apr_pct": 18.1376,
+	"best_long_venue": "binance",
+	"best_short_venue": "hyperliquid",
+	"exchanges_present": 6,
+	"dex_cex_spread_apr_pct": 18.1376
+}

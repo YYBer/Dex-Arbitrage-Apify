@@ -1,0 +1,22 @@
+{
+	"symbol": "ETH",
+	"timestamp": "2026-06-20T11:36:24.650Z",
+	"hyperliquid_funding_apr_pct": 10.95,
+	"hyperliquid_mark_price": 1726.3,
+	"aster_funding_apr_pct": 0,
+	"aster_mark_price": 1725.52647644,
+	"next_funding_time": "2026-06-20T16:00:00.000Z",
+	"lighter_funding_apr_pct": -0.876,
+	"pacifica_funding_apr_pct": -9.5834,
+	"pacifica_mark_price": 1727.687302,
+	"binance_funding_apr_pct": 4.0712,
+	"binance_mark_price": 1726,
+	"bybit_funding_apr_pct": 9.1608,
+	"bybit_mark_price": 1725.99,
+	"max_abs_funding_apr_pct": 10.95,
+	"venue_spread_apr_pct": 20.5334,
+	"best_long_venue": "pacifica",
+	"best_short_venue": "hyperliquid",
+	"exchanges_present": 6,
+	"dex_cex_spread_apr_pct": 6.8788
+}

@@ -34,11 +34,16 @@ Actor.main(async () => {
     const upperSymbols = symbols.map((s) => s.toUpperCase());
     console.log(`Fetching funding rates for: ${upperSymbols.join(', ')}`);
 
-    // Fetch all platforms in parallel
-    const [hl, aster, lighter, pacifica, binance, bybit] = await Promise.allSettled([
+    // Fetch all platforms in parallel.
+    // Binance/Bybit are sourced from Lighter's bundled endpoint to avoid
+    // geo-blocks (451/403) that occur when calling them directly from cloud IPs.
+    // Direct binance.js/bybit.js fetchers are kept as fallback for local use.
+    const [hl, aster, lighterAll, pacifica, binanceDirect, bybitDirect] = await Promise.allSettled([
         includeHyperliquid ? fetchHyperliquid(upperSymbols) : Promise.resolve({}),
         includeAster       ? fetchAster(upperSymbols)       : Promise.resolve({}),
-        includeLighter     ? fetchLighter(upperSymbols)     : Promise.resolve({}),
+        (includeLighter || includeBinance || includeBybit)
+            ? fetchLighter(upperSymbols)
+            : Promise.resolve({ lighter: {}, binance: {}, bybit: {} }),
         includePacifica    ? fetchPacifica(upperSymbols)    : Promise.resolve({}),
         includeBinance     ? fetchBinance(upperSymbols)     : Promise.resolve({}),
         includeBybit       ? fetchBybit(upperSymbols)       : Promise.resolve({}),
@@ -46,33 +51,49 @@ Actor.main(async () => {
 
     const get = (settled) => settled.status === 'fulfilled' ? settled.value : {};
 
+    // Lighter bundles lighter + binance + bybit; fall back to direct if available
+    const lighterData  = get(lighterAll)?.lighter ?? {};
+    const binanceData  = get(lighterAll)?.binance ?? {};
+    const bybitData    = get(lighterAll)?.bybit   ?? {};
+    const binanceDirect_ = get(binanceDirect);
+    const bybitDirect_   = get(bybitDirect);
+
     const timestamp = new Date().toISOString();
     const records = [];
 
     for (const sym of upperSymbols) {
         const venueData = {
-            hyperliquid: includeHyperliquid ? get(hl)[sym] ?? null     : null,
-            aster:       includeAster       ? get(aster)[sym] ?? null   : null,
-            lighter:     includeLighter     ? get(lighter)[sym] ?? null : null,
-            pacifica:    includePacifica    ? get(pacifica)[sym] ?? null: null,
-            binance:     includeBinance     ? get(binance)[sym] ?? null : null,
-            bybit:       includeBybit       ? get(bybit)[sym] ?? null   : null,
+            hyperliquid: includeHyperliquid ? get(hl)[sym] ?? null    : null,
+            aster:       includeAster       ? get(aster)[sym] ?? null  : null,
+            lighter:     includeLighter     ? lighterData[sym] ?? null : null,
+            pacifica:    includePacifica    ? get(pacifica)[sym] ?? null : null,
+            // Prefer direct fetch; fall back to Lighter-bundled data
+            binance: includeBinance
+                ? (binanceDirect_[sym] ?? binanceData[sym] ?? null)
+                : null,
+            bybit: includeBybit
+                ? (bybitDirect_[sym] ?? bybitData[sym] ?? null)
+                : null,
         };
 
-        // Remove null venues so buildRecord only counts present ones
-        const filtered = Object.fromEntries(
+        const present = Object.fromEntries(
             Object.entries(venueData).filter(([, v]) => v !== null)
         );
 
-        const record = buildRecord(sym, filtered, timestamp);
+        const record = buildRecord(sym, present, timestamp);
         if (record) records.push(record);
     }
 
     // Log fetch errors
-    const fetchers = ['hyperliquid', 'aster', 'lighter', 'pacifica', 'binance', 'bybit'];
-    [hl, aster, lighter, pacifica, binance, bybit].forEach((r, i) => {
+    const fetchers = ['hyperliquid', 'aster', 'lighter', 'pacifica', 'binance(direct)', 'bybit(direct)'];
+    [hl, aster, lighterAll, pacifica, binanceDirect, bybitDirect].forEach((r, i) => {
         if (r.status === 'rejected') {
-            console.error(`[${fetchers[i]}] fetch failed:`, r.reason?.message);
+            const status = r.reason?.response?.status;
+            if (status === 451 || status === 403) {
+                console.warn(`[${fetchers[i]}] geo-restricted (${status}), using Lighter-bundled data instead`);
+            } else {
+                console.error(`[${fetchers[i]}] fetch failed:`, r.reason?.message);
+            }
         }
     });
 
